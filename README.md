@@ -12,7 +12,6 @@ A custom **YouTube Music** and **Spotify** desktop client for **Windows x64**, b
 - **Custom Player Layout:** Centered playback bar with smooth drag-and-scrub progress slider, draggable queue ordering, and segmented sidebar navigation slider.
 - **Built-in Spotify Mode:** Switch between YouTube Music and the official Spotify Web Player inside the same window from the left sidebar (powered by Microsoft Edge WebView2 Runtime), with automatic restoration of the last used mode on startup.
 - **Synced Lyrics:** Preconfigured with **LRCLib** (default) and **YTMusic** providers.
-- **Ad Blocking:** Built-in ad blocking for both YouTube Music and Spotify inside WebView2.
 - **In-App Settings:** Open via the **Settings** button below Library or with `Ctrl+,`, including custom CSS theme loading and selectable app icons (`Tempo`, `Spotify`, `YouTube Music`).
 
 ---
