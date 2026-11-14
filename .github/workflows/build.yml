@@ -12,7 +12,7 @@ on:
         default: false
         type: boolean
       release_tag:
-        description: 'Release tag name (e.g. v0.0.1), used when create_release=true'
+        description: 'Release tag name (e.g. v0.0.2), used when create_release=true'
         required: false
         default: ''
         type: string

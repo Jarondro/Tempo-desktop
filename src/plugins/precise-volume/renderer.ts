@@ -130,7 +130,9 @@ export const onPlayerApiReady = async (
 
   /** Add onwheel event to play bar and also track if play bar is hovered */
   function setupPlaybar() {
-    const playerbar = $<HTMLElement>('ytmusic-player-bar');
+    const playerbar = $<HTMLElement>(
+      'ytmusic-player-bar, ytmusic-app-layout > ytmusic-miniplayer',
+    );
     if (!playerbar) return;
 
     playerbar.addEventListener('wheel', (event) => {
@@ -173,12 +175,28 @@ export const onPlayerApiReady = async (
     });
 
     const slider = $('#volume-slider');
-    if (!slider) return;
+    if (slider) {
+      // Observing only changes in 'value' of volume-slider
+      sliderObserver.observe(slider, {
+        attributeFilter: ['value'],
+        attributeOldValue: true,
+      });
+      return;
+    }
 
-    // Observing only changes in 'value' of volume-slider
-    sliderObserver.observe(slider, {
-      attributeFilter: ['value'],
-      attributeOldValue: true,
+    const miniSlider = $<HTMLInputElement>(
+      '.ytMusicMiniPlayerVolumeWrapper input#slider',
+    );
+    miniSlider?.addEventListener('change', () => {
+      const targetValueNumeric = Number(miniSlider.value);
+      if (
+        Number.isFinite(targetValueNumeric) &&
+        (typeof options.savedVolume !== 'number' ||
+          Math.abs(options.savedVolume - targetValueNumeric) > 4)
+      ) {
+        setTooltip(targetValueNumeric);
+        saveVolume(targetValueNumeric);
+      }
     });
   }
 
@@ -220,6 +238,18 @@ export const onPlayerApiReady = async (
         );
       }
     }
+    const miniSlider = $<HTMLInputElement>(
+      '.ytMusicMiniPlayerVolumeWrapper input#slider',
+    );
+    if (miniSlider) {
+      miniSlider.value = String(savedVolume);
+      miniSlider.setAttribute('aria-valuenow', String(savedVolume));
+      miniSlider.setAttribute('aria-valuetext', String(savedVolume));
+      miniSlider.style.setProperty(
+        '--yt-slider-shape-gradient-percent',
+        `${savedVolume}%`,
+      );
+    }
   }
 
   function showVolumeSlider() {
@@ -238,6 +268,8 @@ export const onPlayerApiReady = async (
     'tp-yt-paper-icon-button.volume',
     '#expand-volume-slider',
     '#expand-volume',
+    '.ytMusicMiniPlayerVolumeWrapper input#slider',
+    '.ytMusicMiniPlayerMuteButton button',
   ];
 
   function setTooltip(volume: number) {

@@ -1,6 +1,6 @@
 # Tempo Desktop
 
-A custom **YouTube Music** and **Spotify** desktop client for **Windows x64**, built on Electron and forked from [Pear Desktop](https://github.com/pear-devs/pear-desktop) (revision `3337446`) under the [MIT License](license).
+**Version `0.0.2` (`v0.0.2`)** · A custom **YouTube Music** and **Spotify** desktop client for **Windows x64**, built on Electron and forked from [Pear Desktop](https://github.com/pear-devs/pear-desktop) (revision `3337446`) under the [MIT License](license).
 
 > [!IMPORTANT]
 > **Disclaimer:** This is an independent, unofficial open-source project and is not affiliated with, endorsed by, or connected to Google LLC, YouTube, or Spotify AB. Product names, logos, and trademarks belong to their respective owners and are used for identification purposes only. You use this software at your own risk.
@@ -9,10 +9,19 @@ A custom **YouTube Music** and **Spotify** desktop client for **Windows x64**, b
 
 ## Features
 
-- **Custom Player Layout:** Centered playback bar with smooth drag-and-scrub progress slider, draggable queue ordering, and segmented sidebar navigation slider.
+- **Custom Player Layout:** Centered playback bar with smooth drag-and-scrub progress slider, horizontal volume slider, **Song / Video** capsule switcher, draggable + click-to-play queue ordering, and segmented sidebar navigation slider.
 - **Built-in Spotify Mode:** Switch between YouTube Music and the official Spotify Web Player inside the same window from the left sidebar (powered by Microsoft Edge WebView2 Runtime), with automatic restoration of the last used mode on startup.
 - **Synced Lyrics:** Preconfigured with **LRCLib** (default) and **YTMusic** providers.
-- **In-App Settings:** Open via the **Settings** button below Library or with `Ctrl+,`, including custom CSS theme loading and selectable app icons (`Tempo`, `Spotify`, `YouTube Music`).
+- **In-App Settings:** Open via the **Settings** button below Library or with `Ctrl+,`, showing the active app version (`Tempo Desktop · Version 0.0.2`), custom CSS theme loading, and selectable app icons (`Tempo`, `Spotify`, `YouTube Music`).
+
+---
+
+## What's New in Version 0.0.2
+
+- **YouTube Music Miniplayer Bar Support:** Unified custom player styling, seekable progress bar scrubbing, permanent horizontal volume slider beside the mute button, and IPC media control integration for `<ytmusic-miniplayer>`.
+- **Song / Video Switcher:** Capsule **Song / Video** toggle slider next to the like/dislike controls (and in classic player bar right controls) supporting click and drag switching.
+- **Click-to-Play Queue Items:** Click anywhere on a queue row body to play or resume that track while keeping the drag handle (`=`) and overflow menu (`⋮`) separate.
+- **In-App Version Label:** Added a version badge (`Tempo Desktop · Version 0.0.2` / `Verze 0.0.2`) to the **Settings** dialog header.
 
 ---
 
@@ -20,8 +29,8 @@ A custom **YouTube Music** and **Spotify** desktop client for **Windows x64**, b
 
 Depending on the release format in **Releases**, choose one of the following:
 
-- **`Tempo-Desktop-Portable-*-x64.exe`** — Single standalone executable that launches directly without installation.
-- **`Tempo-Desktop-Setup-*-x64.exe`** — Standard Windows installer with Start Menu shortcut and uninstaller.
+- **`Tempo-Desktop-Portable-0.0.2-x64.exe`** — Single standalone executable that launches directly without installation.
+- **`Tempo-Desktop-Setup-0.0.2-x64.exe`** — Standard Windows installer with Start Menu shortcut and uninstaller.
 - **`Tempo-Desktop-win-x64.zip`** — Portable archive; extract the entire folder and run `Tempo Desktop.exe`.
 
 > [!NOTE]
@@ -47,8 +56,8 @@ pnpm typecheck
 pnpm dist:win:dir
 
 # Single executables for GitHub Releases -> pack/
-pnpm dist:win:installer   # -> pack/Tempo-Desktop-Setup-0.0.1-x64.exe
-pnpm dist:win:portable    # -> pack/Tempo-Desktop-Portable-0.0.1-x64.exe
+pnpm dist:win:installer   # -> pack/Tempo-Desktop-Setup-0.0.2-x64.exe
+pnpm dist:win:portable    # -> pack/Tempo-Desktop-Portable-0.0.2-x64.exe
 pnpm dist:win             # -> both installer and portable executables
 ```
 

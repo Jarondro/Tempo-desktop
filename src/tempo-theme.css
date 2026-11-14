@@ -111,13 +111,13 @@ ytmusic-player-page #side-panel {
     font-variant-numeric: tabular-nums;
   }
 
+  ytmusic-player-queue #contents > :is(ytmusic-player-queue-item, ytmusic-playlist-panel-video-wrapper-renderer),
+  ytmusic-player-queue #contents > :is(ytmusic-player-queue-item, ytmusic-playlist-panel-video-wrapper-renderer) :is(.song-info, .left-items, .left-items [role='button']) { cursor: pointer; }
+
   ytmusic-player-queue #contents > [data-tempo-queue-row] {
     position: relative;
     user-select: none;
   }
-
-  [data-tempo-queue-row],
-  [data-tempo-queue-row] :is(.song-info, .song-info a, .left-items, .left-items [role='button']) { cursor: grab; }
 
   [data-tempo-queue-row] .ytmusic-reorder-handle {
     display: flex;
@@ -510,11 +510,13 @@ ytmusic-guide-entry-renderer[is-primary] > tp-yt-paper-item:focus-visible {
 }
 
 ytmusic-player-bar,
+ytmusic-miniplayer,
 ytmusic-app-layout #player-bar-background {
   background-color: var(--tempo-surface);
 }
 
-ytmusic-player-bar {
+ytmusic-player-bar,
+ytmusic-miniplayer {
   box-shadow: inset 0 1px var(--tempo-edge);
 }
 
@@ -523,16 +525,48 @@ ytmusic-player-bar #progress-bar {
   --paper-slider-knob-color: var(--tempo-accent);
 }
 
+ytmusic-app-layout#layout:not(.pip, [player-fullscreened])
+  > ytmusic-miniplayer:not([data-tempo-player]):not([player-fullscreened]) {
+  background-image:
+    radial-gradient(ellipse at 55% -90%, #493740 0%, transparent 68%),
+    linear-gradient(165deg, #242227, #1a191d 75%);
+  box-shadow: inset 0 1px #ffffff1f, 0 -10px 28px #0003;
+
+  .ytmusicTrackInfoThumbnailWrapper {
+    width: 44px;
+    height: 44px;
+    aspect-ratio: auto;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+
+  .ytmusicTrackInfoTitle {
+    color: #faf8fa;
+    font-weight: 600;
+  }
+
+  .ytmusicTrackInfoByline { color: #bab1bb; }
+
+  .ytMusicSmallViewportMiniplayerPlayPauseButton button {
+    border-radius: 50%;
+    background: #ffffff12;
+    color: #fff;
+  }
+
+  .ytMusicMiniPlayerProgressBar { background: #ffffff36 !important; }
+}
+
 .tempo-player-elapsed,
 .tempo-player-duration {
   display: none;
 }
 
-ytmusic-app-layout#layout:has(> ytmusic-player-bar[data-tempo-player]):not(.pip):not(:has(> ytmusic-player-bar[player-fullscreened])) {
+ytmusic-app-layout#layout:has(> :is(ytmusic-player-bar, ytmusic-miniplayer)[data-tempo-player]):not(.pip, [player-fullscreened]):not(:has(> [player-fullscreened])) {
   --ytmusic-player-bar-height: 84px !important;
 }
 
-ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not([player-fullscreened]) {
+ytmusic-app-layout#layout:not(.pip, [player-fullscreened])
+  > :is(ytmusic-player-bar, ytmusic-miniplayer)[data-tempo-player]:not([player-fullscreened]) {
   --tempo-timeline-inset: 49px;
   --tempo-outer-transport-offset: 86px;
   --tempo-transport-row: 45px;
@@ -542,31 +576,44 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
   height: var(--ytmusic-player-bar-height);
   width: 100vw !important;
   inset-inline-start: 0 !important;
+  display: grid;
+  align-items: center;
   grid-template:
     'track transport options' var(--tempo-transport-row)
     'track timeline options' 26px
-    / minmax(0, 1fr) minmax(224px, 36%) minmax(0, 1fr);
+    / minmax(0, 1fr) minmax(224px, 25%) minmax(0, 1fr);
   column-gap: 16px;
   padding: 7px 16px 6px;
+  overflow: visible;
   background-image:
     radial-gradient(ellipse at 55% -90%, #493740 0%, transparent 68%),
     linear-gradient(165deg, #242227, #1a191d 75%);
   box-shadow: inset 0 1px #ffffff1f, 0 -10px 28px #0003;
 
-  > .middle-controls {
+  > :is(.middle-controls, .ytMusicMiniPlayerLeftSection) {
     grid-area: track;
     justify-content: flex-start;
     gap: 12px;
     min-width: 0;
     width: 100%;
+    height: auto;
     padding: 0;
   }
 
-  .thumbnail-image-wrapper:not([hidden]) {
-    display: grid;
+  .ytMusicMiniPlayerTrackInfo {
+    gap: 12px;
+    align-items: center;
+    margin-inline: 0;
+    max-width: none;
+  }
+
+  :is(.thumbnail-image-wrapper, .ytmusicTrackInfoThumbnailWrapper):not([hidden]) {
+    display: grid !important;
     place-items: center;
     flex: 0 0 52px;
+    width: 52px;
     height: 52px;
+    aspect-ratio: auto;
     border-radius: 7px;
     margin: 0;
     overflow: hidden;
@@ -574,29 +621,37 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
     box-shadow: 0 3px 9px #0005, inset 0 0 0 1px #ffffff17;
   }
 
-  .thumbnail-image-wrapper > img {
+  :is(.thumbnail-image-wrapper > img, .ytmusicTrackInfoThumbnail) {
     width: 100%;
     height: 100%;
     min-width: 0;
+    border-radius: 0;
     object-fit: cover;
   }
 
-  .content-info-wrapper {
+  :is(.content-info-wrapper, .ytmusicTrackInfoContentInfoWrapper) {
     min-width: 0;
+    max-width: none;
     margin: 0;
     gap: 3px;
   }
 
-  .content-info-wrapper .title {
+  :is(.content-info-wrapper .title, .ytmusicTrackInfoTitle) {
     color: #faf8fa;
     font-size: 14px;
     font-weight: 650;
+    line-height: 1.3;
   }
 
-  .content-info-wrapper .subtitle {
+  :is(.content-info-wrapper .subtitle, .ytmusicTrackInfoByline) {
     --yt-endpoint-color: var(--tempo-player-muted);
     color: var(--tempo-player-muted);
     font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .ytmusicTrackInfoByline a.ytAttributedStringLink {
+    color: inherit;
   }
 
   .middle-controls-buttons {
@@ -648,14 +703,216 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
 
   .play-pause-button:not(.buffering-spinner):hover { background: #ffffff24; }
 
-  > .right-controls {
+  > .ytMusicMiniPlayerMiddleSection {
+    grid-area: transport;
+    align-self: center;
+    justify-self: center;
+    margin: 0;
+  }
+
+  .ytmusicPlayerControlsMainControls {
+    gap: 6px;
+  }
+
+  .ytmusicPlayerControlsControlButton {
+    width: 36px;
+    height: 36px;
+    color: #f1eff2;
+  }
+
+  .ytmusicPlayerControlsControlButton button {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    color: inherit;
+  }
+
+  .ytmusicPlayerControlsControlButton :is(.ytIconWrapperHost, svg) {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .ytmusicPlayerControlsPlayPauseButton {
+    width: 40px;
+    height: 40px;
+    margin-inline: 4px;
+  }
+
+  .ytmusicPlayerControlsPlayPauseButton button {
+    border-radius: 50%;
+    background: #ffffff12;
+    color: #fff;
+  }
+
+  .ytmusicPlayerControlsPlayPauseButton button:hover {
+    background: #ffffff24;
+  }
+
+  .ytmusicPlayerControlsPlayPauseButton :is(.ytIconWrapperHost, svg) {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  :is(.ytmusicPlayerControlsShuffleButton, .ytmusicPlayerControlsRepeatButton) button[aria-pressed='false'] {
+    opacity: 0.72;
+  }
+
+  :is(.ytmusicPlayerControlsShuffleButton, .ytmusicPlayerControlsRepeatButton) button[aria-pressed='true'] {
+    color: var(--tempo-accent);
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) {
     grid-area: options;
     position: static;
     justify-content: flex-end;
     gap: 4px;
     min-width: 0;
     width: auto;
+    height: auto;
     padding: 0;
+    overflow: visible;
+  }
+
+  > .ytMusicMiniPlayerRightSection > :not(.ytMusicMiniPlayerActionBar) button {
+    background: transparent;
+    color: #e7e1e8;
+  }
+
+  > .ytMusicMiniPlayerRightSection > :not(.ytMusicMiniPlayerActionBar) button:hover {
+    background: #ffffff14;
+    color: #fff;
+  }
+
+  .ytMusicMiniPlayerActionBar button {
+    background: #ffffff12;
+    color: #f3edf5;
+  }
+
+  .ytMusicMiniPlayerActionBar button:hover {
+    background: #ffffff20;
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    flex: 0 0 auto;
+    height: 30px;
+    padding: 2px;
+    margin-inline: 2px;
+    border: 1px solid #ffffff1a;
+    border-radius: 9999px;
+    background: #ffffff12;
+    box-sizing: border-box;
+    user-select: none;
+    touch-action: none;
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle[hidden] {
+    display: none;
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-slider {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    width: calc(50% - 2px);
+    border-radius: 9999px;
+    background: #ffffff26;
+    box-shadow: 0 1px 2px #0000004d;
+    pointer-events: none;
+    transform: translateX(calc(var(--tempo-av-pos, 0) * 100%));
+    transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 150ms ease;
+  }
+
+  &:dir(rtl) > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-slider {
+    left: auto;
+    right: 2px;
+    transform: translateX(calc(var(--tempo-av-pos, 0) * -100%));
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle[data-dragging='true'] > .tempo-av-toggle-slider {
+    transition: none;
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-btn {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-width: 50px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: #ffffff9e;
+    font: 500 12px/1 var(--ytmusic-title-font-family, Roboto, Arial, sans-serif);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    cursor: pointer;
+    appearance: none;
+    transition: color 150ms ease;
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-btn:hover:not(:disabled) {
+    background: transparent;
+    color: #ffffffeb;
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-btn[aria-pressed='true'] {
+    background: transparent;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-btn:disabled {
+    color: #ffffff40;
+    cursor: default;
+  }
+
+  > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-slider,
+    > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-btn {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 1260px) {
+    column-gap: 10px;
+    grid-template:
+      'track transport options' var(--tempo-transport-row)
+      'track timeline options' 26px
+      / minmax(0, 1fr) minmax(210px, 1fr) auto;
+  }
+
+  @media (max-width: 1050px) {
+    > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-btn {
+      min-width: 44px;
+      padding: 0 8px;
+      font-size: 11px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle {
+      height: 28px;
+      margin-inline: 1px;
+    }
+
+    > :is(.right-controls, .ytMusicMiniPlayerRightSection) > .tempo-av-toggle > .tempo-av-toggle-btn {
+      min-width: 44px;
+      padding: 0 8px;
+      font-size: 11px;
+    }
   }
 
   .right-controls-buttons {
@@ -679,10 +936,101 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
 
   .volume-slider #sliderContainer { margin-inline: 6px; }
 
-  #progress-bar {
-    --paper-slider-active-color: var(--tempo-player-progress);
-    --paper-slider-knob-color: var(--tempo-player-progress);
-    --paper-slider-container-color: #ffffff36;
+  .ytMusicMiniPlayerVolumeWrapper {
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .ytMusicMiniPlayerMuteButton button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ytMusicMiniPlayerMuteButton :is(.ytIconWrapperHost, svg) {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .ytMusicMiniPlayerVolumePopup {
+    display: flex !important;
+    position: static;
+    transform: none;
+    flex: 0 1 clamp(48px, 6.2vw, 84px);
+    min-width: 44px;
+    width: clamp(48px, 6.2vw, 84px);
+    height: 28px;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    z-index: auto;
+  }
+
+  .ytMusicMiniPlayerVolumePopup slider-shape.ytSliderShapeHost {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    writing-mode: horizontal-tb;
+    direction: ltr;
+  }
+
+  .ytMusicMiniPlayerVolumePopup input#slider {
+    width: 100%;
+    height: 24px;
+    margin: 0 6px;
+    padding: 0;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ytMusicMiniPlayerVolumePopup input#slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 2px;
+    border-radius: 12px;
+    background: linear-gradient(
+      to right,
+      #fff 0%,
+      #fff var(--yt-slider-shape-gradient-percent, 100%),
+      #8e8c90 var(--yt-slider-shape-gradient-percent, 100%),
+      #8e8c90 100%
+    );
+  }
+
+  .ytMusicMiniPlayerVolumePopup input#slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    margin: -5px 0 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px #0006;
+    cursor: pointer;
+  }
+
+  .ytMusicMiniPlayerVolumePopup input#slider:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  &:dir(rtl) .ytMusicMiniPlayerVolumePopup slider-shape.ytSliderShapeHost {
+    direction: rtl;
+  }
+
+  &:dir(rtl) .ytMusicMiniPlayerVolumePopup input#slider::-webkit-slider-runnable-track {
+    background: linear-gradient(
+      to left,
+      #fff 0%,
+      #fff var(--yt-slider-shape-gradient-percent, 100%),
+      #8e8c90 var(--yt-slider-shape-gradient-percent, 100%),
+      #8e8c90 100%
+    );
+  }
+
+  > :is(#progress-bar, .ytMusicMiniPlayerProgressBarWrapper) {
     grid-area: timeline;
     position: absolute;
     inset: auto var(--tempo-timeline-inset) 6px;
@@ -694,11 +1042,17 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
     z-index: 1;
     cursor: pointer;
     touch-action: none;
+  }
+  > :is(#progress-bar, .ytMusicMiniPlayerProgressBarWrapper)[data-tempo-scrubbing] { cursor: grabbing; }
+
+  #progress-bar {
+    --paper-slider-active-color: var(--tempo-player-progress);
+    --paper-slider-knob-color: var(--tempo-player-progress);
+    --paper-slider-container-color: #ffffff36;
     --paper-slider-height: 4px;
     --paper-slider-knob-size: 26px;
     --paper-slider-knob-top: 0px;
   }
-  #progress-bar[data-tempo-scrubbing] { cursor: grabbing; }
 
   #progress-bar > #sliderContainer {
     position: absolute;
@@ -760,24 +1114,102 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
     display: none !important;
     opacity: 0 !important;
   }
-  #progress-bar > #sliderContainer::after {
+  #progress-bar > #sliderContainer::after,
+  .ytMusicMiniPlayerProgressBarWrapper::after {
     content: '';
     position: absolute;
-    left: var(--tempo-played, 0%);
+    inset-inline-start: var(--tempo-played, 0%);
     top: 50%;
     transform: translate(-50%, -50%);
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: var(--paper-slider-knob-color);
+    background: var(--tempo-player-progress);
     pointer-events: none;
     transition: transform 120ms ease;
   }
-  #progress-bar[data-tempo-scrubbing] > #sliderContainer::after {
+  #progress-bar[data-tempo-scrubbing] > #sliderContainer::after,
+  .ytMusicMiniPlayerProgressBarWrapper[data-tempo-scrubbing]::after {
     transform: translate(-50%, -50%) scale(1.3);
   }
 
-  .time-info {
+  .ytMusicMiniPlayerProgressBarWrapper {
+    overflow: visible;
+  }
+  .ytMusicMiniPlayerProgressBarWrapper::before {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 4px;
+    transform: translateY(-50%);
+    border-radius: 10px;
+    background: linear-gradient(
+      to right,
+      var(--tempo-player-progress) 0%,
+      var(--tempo-player-progress) var(--tempo-played, 0%),
+      #ffffff36 var(--tempo-played, 0%),
+      #ffffff36 100%
+    );
+    pointer-events: none;
+  }
+  &:dir(rtl) .ytMusicMiniPlayerProgressBarWrapper::before {
+    background: linear-gradient(
+      to left,
+      var(--tempo-player-progress) 0%,
+      var(--tempo-player-progress) var(--tempo-played, 0%),
+      #ffffff36 var(--tempo-played, 0%),
+      #ffffff36 100%
+    );
+  }
+  &:dir(rtl) :is(#progress-bar > #sliderContainer, .ytMusicMiniPlayerProgressBarWrapper)::after {
+    transform: translate(50%, -50%);
+  }
+  &:dir(rtl) :is(#progress-bar[data-tempo-scrubbing] > #sliderContainer, .ytMusicMiniPlayerProgressBarWrapper[data-tempo-scrubbing])::after {
+    transform: translate(50%, -50%) scale(1.3);
+  }
+  input.ytMusicMiniPlayerProgressBar {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100% !important;
+    margin: 0;
+    padding: 0;
+    appearance: none;
+    background: transparent !important;
+    cursor: pointer;
+    touch-action: none;
+  }
+  input.ytMusicMiniPlayerProgressBar[data-tempo-scrubbing] { cursor: grabbing; }
+  input.ytMusicMiniPlayerProgressBar::-webkit-slider-runnable-track {
+    appearance: none;
+    height: 100%;
+    background: transparent !important;
+    border: 0;
+  }
+  input.ytMusicMiniPlayerProgressBar::-webkit-slider-thumb {
+    appearance: none;
+    width: 0;
+    height: 0;
+    opacity: 0 !important;
+  }
+  input.ytMusicMiniPlayerProgressBar:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  .ytMusicMiniPlayerHoverTimeInfo {
+    top: 3px;
+    padding: 2px 6px;
+    font-size: 11px;
+    line-height: 1.3;
+    pointer-events: none;
+    border-radius: 6px;
+    background: #141218e6;
+    z-index: 4;
+  }
+
+  :is(.time-info, .ytMusicMiniPlayerTimeInfo) {
+    display: block !important;
     position: absolute;
     width: 1px;
     height: 1px;
@@ -803,10 +1235,11 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
 }
 
 @media (max-width: 760px) {
-  ytmusic-app-layout#layout:has(> ytmusic-player-bar[data-tempo-player]):not(.pip):not(:has(> ytmusic-player-bar[player-fullscreened])) {
+  ytmusic-app-layout#layout:has(> :is(ytmusic-player-bar, ytmusic-miniplayer)[data-tempo-player]):not(.pip, [player-fullscreened]):not(:has(> [player-fullscreened])) {
     --ytmusic-player-bar-height: 112px !important;
   }
-  ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not([player-fullscreened]) {
+  ytmusic-app-layout#layout:not(.pip, [player-fullscreened])
+    > :is(ytmusic-player-bar, ytmusic-miniplayer)[data-tempo-player]:not([player-fullscreened]) {
     --tempo-outer-transport-offset: 75px;
     --tempo-transport-row: 38px;
     grid-template:
@@ -821,8 +1254,13 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
     max-height: none;
     top: auto !important;
     bottom: 0 !important;
-    .thumbnail-image-wrapper:not([hidden]) { flex-basis: 37px; height: 37px; }
-    > .middle-controls { gap: 8px; }
+    :is(.thumbnail-image-wrapper, .ytmusicTrackInfoThumbnailWrapper):not([hidden]) {
+      flex-basis: 37px;
+      width: 37px;
+      height: 37px;
+    }
+    > :is(.middle-controls, .ytMusicMiniPlayerLeftSection),
+    .ytMusicMiniPlayerTrackInfo { gap: 8px; }
     .play-pause-button:not(.buffering-spinner) { width: 36px; height: 36px; padding: 5px; }
     .previous-button { translate: -39px 0; }
     .next-button { translate: 39px 0; }
@@ -830,25 +1268,36 @@ ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not(
     .right-controls-buttons > :is(.shuffle, .repeat) {
       inset-block-start: calc(46px + var(--tempo-transport-row) / 2);
     }
+    .ytmusicPlayerControlsControlButton { width: 32px; height: 32px; }
+    .ytmusicPlayerControlsControlButton :is(.ytIconWrapperHost, svg) {
+      width: 20px !important;
+      height: 20px !important;
+    }
+    .ytmusicPlayerControlsPlayPauseButton { width: 36px; height: 36px; margin-inline: 2px; }
     .volume-slider {
       flex: 0 0 clamp(44px, 11vw, 65px);
     }
-    #progress-bar {
+    .ytMusicMiniPlayerVolumePopup {
+      flex: 0 0 clamp(44px, 11vw, 65px);
+      width: clamp(44px, 11vw, 65px);
+    }
+    > :is(#progress-bar, .ytMusicMiniPlayerProgressBarWrapper) {
       height: 22px;
       --paper-slider-knob-size: 22px;
     }
   }
-  ytmusic-app-layout#layout:has(> ytmusic-player-bar[data-tempo-player]):not(.pip)
-    ytmusic-player-bar.top-player-bar {
+  ytmusic-app-layout#layout:has(> :is(ytmusic-player-bar, ytmusic-miniplayer)[data-tempo-player]):not(.pip)
+    :is(ytmusic-player-bar, ytmusic-miniplayer).top-player-bar {
     display: none !important;
   }
 }
 
 @media (max-width: 495px) {
-  ytmusic-app-layout#layout:not(.pip) > ytmusic-player-bar[data-tempo-player]:not([player-fullscreened]) {
+  ytmusic-app-layout#layout:not(.pip, [player-fullscreened])
+    > :is(ytmusic-player-bar, ytmusic-miniplayer)[data-tempo-player]:not([player-fullscreened]) {
     .middle-controls-buttons { margin-inline-end: -4px; }
     .middle-controls-buttons :is(ytmusic-like-button-renderer, .top-level-buttons) { display: none; }
-    .content-info-wrapper .title { font-size: 13px; }
+    :is(.content-info-wrapper .title, .ytmusicTrackInfoTitle) { font-size: 13px; }
   }
 }
 

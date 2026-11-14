@@ -46,10 +46,25 @@ export const setupTimeChangedListener = singleton(() => {
   const progressBar = document.querySelector('#progress-bar');
   if (progressBar) {
     progressObserver.observe(progressBar, { attributeFilter: ['value'] });
+    return;
   }
+
+  const video = document.querySelector('video');
+  if (!video) return;
+  let lastSecond = -1;
+  video.addEventListener('timeupdate', () => {
+    const numberValue = Math.floor(video.currentTime);
+    if (numberValue === lastSecond) return;
+    lastSecond = numberValue;
+    window.ipcRenderer.send('peard:time-changed', numberValue);
+    songInfo.elapsedSeconds = numberValue;
+  });
 });
 
 export const setupRepeatChangedListener = singleton(() => {
+  const repeatButton = document.querySelector('#right-controls .repeat');
+  if (!repeatButton) return;
+
   const repeatObserver = new MutationObserver((mutations) => {
     // provided by App
     window.ipcRenderer.send(
@@ -63,7 +78,7 @@ export const setupRepeatChangedListener = singleton(() => {
       ).__dataHost.getState().queue.repeatMode,
     );
   });
-  repeatObserver.observe(document.querySelector('#right-controls .repeat')!, {
+  repeatObserver.observe(repeatButton, {
     attributeFilter: ['title'],
   });
 
@@ -180,12 +195,13 @@ export const setupAutoPlayChangedListener = singleton(() => {
   const autoplaySlider = document.querySelector<HTMLInputElement>(
     '.autoplay > tp-yt-paper-toggle-button',
   );
+  if (!autoplaySlider) return;
 
   const observer = new MutationObserver(() => {
     window.ipcRenderer.send('peard:autoplay-changed');
   });
 
-  observer.observe(autoplaySlider!, {
+  observer.observe(autoplaySlider, {
     attributes: true,
     childList: false,
     subtree: false,

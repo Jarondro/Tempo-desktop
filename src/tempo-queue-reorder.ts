@@ -39,6 +39,7 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
         startY: number;
         x: number;
         y: number;
+        isHandle: boolean;
       }
     | undefined;
   let drag:
@@ -57,6 +58,7 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
     | undefined;
   let frame = 0;
   let suppressClick = false;
+  let suppressTimer: ReturnType<typeof setTimeout> | undefined;
 
   function refresh() {
     for (const entry of entries())
@@ -178,6 +180,10 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
     if (list.hasPointerCapture(pointerId))
       list.releasePointerCapture(pointerId);
     suppressClick = true;
+    clearTimeout(suppressTimer);
+    suppressTimer = setTimeout(() => {
+      suppressClick = false;
+    }, 0);
 
     if (
       !commit ||
@@ -206,6 +212,7 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
     'pointerdown',
     (event) => {
       if (event.button !== 0 || gesture) return;
+      clearTimeout(suppressTimer);
       suppressClick = false;
       const target = event.target as Element;
       const row = target.closest<QueueEntry>('ytmusic-player-queue-item');
@@ -224,18 +231,12 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
       const handle = target.closest('.ytmusic-reorder-handle');
       if (!handle) {
         if (event.pointerType !== 'mouse') return;
-        // In the thumbnail and text, a short click still acts on the original control.
+        // Never hijack clicks on the thumbnail play button or row action controls for drag.
+        if (target.closest('.left-items')) return;
         const control = target.closest(interactiveSelector);
-        if (
-          control &&
-          control !== row &&
-          row.contains(control) &&
-          !control.closest('.left-items, .song-info')
-        )
-          return;
+        if (control && control !== row && row.contains(control)) return;
       }
-      // Keep native mouse-down gestures from taking over. A short click still
-      // reaches the original control, including links and the play button.
+      // Keep native mouse-down gestures from starting a drag on non-handle areas while allowing clicks.
       event.preventDefault();
       event.stopImmediatePropagation();
       gesture = {
@@ -245,6 +246,7 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
         startY: event.clientY,
         x: event.clientX,
         y: event.clientY,
+        isHandle: Boolean(handle),
       };
     },
     { capture: true, signal },
@@ -256,9 +258,11 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
       if (!gesture || gesture.pointerId !== event.pointerId) return;
       gesture.x = event.clientX;
       gesture.y = event.clientY;
+      const threshold = gesture.isHandle ? 5 : 10;
       if (
         !drag &&
-        Math.hypot(gesture.x - gesture.startX, gesture.y - gesture.startY) >= 5
+        Math.hypot(gesture.x - gesture.startX, gesture.y - gesture.startY) >=
+          threshold
       )
         begin();
       if (drag) requestPreview();
@@ -321,6 +325,31 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
     );
   }
 
+  // Let clicking anywhere on a queue row body (outside action buttons/handles) play that song.
+  list.addEventListener(
+    'click',
+    (event) => {
+      if (event.defaultPrevented || drag || suppressClick) return;
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target as Element | null;
+      if (!target || target.closest('.left-items, .ytmusic-reorder-handle')) return;
+
+      const wrapper = target.closest<QueueEntry>('ytmusic-playlist-panel-video-wrapper-renderer');
+      const row =
+        target.closest<QueueEntry>('ytmusic-player-queue-item') ??
+        wrapper?.querySelector<QueueEntry>('ytmusic-player-queue-item');
+      if (!row || (wrapper ?? row).parentElement !== list) return;
+
+      const control = target.closest(interactiveSelector);
+      if (control && control !== row && row.contains(control)) return;
+
+      if (!row.hasAttribute('selected') || row.getAttribute('play-button-state') === 'paused') {
+        row.querySelector<HTMLElement>('ytmusic-play-button-renderer')?.click();
+      }
+    },
+    { signal },
+  );
+
   const observer = new MutationObserver(() => {
     finish(false);
     refresh();
@@ -328,6 +357,7 @@ function attachReorder(queue: QueueElement, list: HTMLElement) {
   observer.observe(list, { childList: true });
   refresh();
   return () => {
+    clearTimeout(suppressTimer);
     finish(false);
     events.abort();
     observer.disconnect();

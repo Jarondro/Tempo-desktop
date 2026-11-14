@@ -3,7 +3,7 @@
   "name": "tempo-desktop",
   "desktopName": "com.github.th-ch.\u0079\u006f\u0075\u0074\u0075\u0062\u0065\u002d\u006d\u0075\u0073\u0069\u0063",
   "productName": "Tempo Desktop",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Tempo Desktop - YouTube Music & Spotify Desktop App for Windows (based on Pear Desktop)",
   "main": "./dist/main/index.js",
   "type": "module",

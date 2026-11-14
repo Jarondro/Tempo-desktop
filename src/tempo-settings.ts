@@ -10,8 +10,24 @@ interface GuideEntry extends HTMLElement {
 export function mountTempoSettings() {
   const czech = /^cs\b/.test(window.mainConfig.get('options.language') ?? document.documentElement.lang);
   const copy = czech
-    ? { title: 'Nastavení', close: 'Zavřít', back: 'Zpět', search: 'Hledat plugin', empty: 'Žádný plugin neodpovídá hledání.', loadError: 'Nastavení se nepodařilo načíst.' }
-    : { title: 'Settings', close: 'Close', back: 'Back', search: 'Find a plugin', empty: 'No plugins match your search.', loadError: 'Settings could not be loaded.' };
+    ? {
+        title: 'Nastavení',
+        close: 'Zavřít',
+        back: 'Zpět',
+        search: 'Hledat plugin',
+        empty: 'Žádný plugin neodpovídá hledání.',
+        loadError: 'Nastavení se nepodařilo načíst.',
+        version: (v: string) => `Tempo Desktop · Verze ${v}`,
+      }
+    : {
+        title: 'Settings',
+        close: 'Close',
+        back: 'Back',
+        search: 'Find a plugin',
+        empty: 'No plugins match your search.',
+        loadError: 'Settings could not be loaded.',
+        version: (v: string) => `Tempo Desktop · Version ${v}`,
+      };
 
   const style = new CSSStyleSheet();
   style.replaceSync(settingsCss);
@@ -34,13 +50,17 @@ export function mountTempoSettings() {
   dialog.id = 'tempo-settings';
   dialog.setAttribute('aria-labelledby', 'tempo-settings-title');
   const header = element('header', 'tempo-settings-header');
+  const heading = element('div', 'tempo-settings-heading');
   const title = element('h1', '', copy.title);
   title.id = 'tempo-settings-title';
+  const versionBadge = element('span', 'tempo-settings-version');
+  versionBadge.hidden = true;
+  heading.append(title, versionBadge);
   const close = control('tempo-settings-close', '×');
   close.setAttribute('aria-label', copy.close);
   close.title = copy.close;
   close.autofocus = true;
-  header.append(title, close);
+  header.append(heading, close);
 
   const grid = element('div', 'tempo-settings-grid');
   const categories = element('nav', 'tempo-settings-categories');
@@ -246,11 +266,25 @@ export function mountTempoSettings() {
     }
   }
 
+  async function loadVersion() {
+    if (!versionBadge.hidden) return;
+    try {
+      const version = (await window.ipcRenderer.invoke('tempo:app-version')) as string;
+      if (version) {
+        versionBadge.textContent = copy.version(version);
+        versionBadge.hidden = false;
+      }
+    } catch {
+      // Ignore transient startup IPC error; retried when opening settings.
+    }
+  }
+
   function openSettings(trigger = getTriggers().find(isVisible)) {
     if (dialog.open) return;
     dialog.showModal();
     activeTrigger = trigger;
     for (const button of getTriggers()) button.setAttribute('aria-expanded', 'true');
+    loadVersion();
     refresh();
   }
 
@@ -290,6 +324,7 @@ export function mountTempoSettings() {
   window.ipcRenderer.on('refresh-in-app-menu', () => {
     if (dialog.open) refresh();
   });
+  loadVersion();
   placeTriggers();
   new MutationObserver(placeTriggers).observe(document.body, { childList: true, subtree: true });
 }

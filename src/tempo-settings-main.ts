@@ -1,4 +1,4 @@
-import { Menu, type BrowserWindow, type MenuItem } from 'electron';
+import { app, Menu, type BrowserWindow, type MenuItem } from 'electron';
 
 import type { SettingsItem } from './tempo-settings-menu';
 
@@ -32,6 +32,9 @@ export function setupTempoSettings(win: BrowserWindow) {
     return frame && !frame.parent && URL.parse(frame.url)?.origin === 'https://music.youtube.com';
   };
 
+  webContents.ipc.handle('tempo:app-version', (event) =>
+    allowed(event) ? app.getVersion() : '',
+  );
   webContents.ipc.handle('tempo:settings-menu', (event) =>
     allowed(event) ? menuSnapshot(Menu.getApplicationMenu()?.items ?? []) : [],
   );

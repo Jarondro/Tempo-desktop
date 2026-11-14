@@ -19,6 +19,7 @@ import {
 } from './loader/renderer';
 import { startingPages } from './providers/extracted-data';
 import { setupSongInfo } from './providers/song-info-front';
+import { mountTempoAvToggle } from './tempo-av-toggle';
 import { mountTempoPlayerBar } from './tempo-player-bar';
 import { mountTempoPlayerTabs } from './tempo-player-tabs';
 import { mountTempoQueueReorder } from './tempo-queue-reorder';
@@ -281,12 +282,16 @@ async function onApiLoaded() {
 
   window.ipcRenderer.on('peard:previous-video', () => {
     document
-      .querySelector<HTMLElement>('.previous-button.ytmusic-player-bar')
+      .querySelector<HTMLElement>(
+        '.previous-button.ytmusic-player-bar, ytmusic-app-layout > ytmusic-miniplayer .ytmusicPlayerControlsPreviousButton button',
+      )
       ?.click();
   });
   window.ipcRenderer.on('peard:next-video', () => {
     document
-      .querySelector<HTMLElement>('.next-button.ytmusic-player-bar')
+      .querySelector<HTMLElement>(
+        '.next-button.ytmusic-player-bar, ytmusic-app-layout > ytmusic-miniplayer .ytmusicPlayerControlsNextButton button',
+      )
       ?.click();
   });
   window.ipcRenderer.on('peard:play', (_) => {
@@ -302,20 +307,32 @@ async function onApiLoaded() {
   window.ipcRenderer.on('peard:seek-to', (_, t: number) => api!.seekTo(t));
   window.ipcRenderer.on('peard:seek-by', (_, t: number) => api!.seekBy(t));
   window.ipcRenderer.on('peard:shuffle', () => {
+    const classicBar = document.querySelector<
+      HTMLElement & { queue?: { shuffle: () => void } }
+    >('ytmusic-player-bar');
+    if (classicBar?.queue?.shuffle) {
+      classicBar.queue.shuffle();
+      return;
+    }
     document
-      .querySelector<HTMLElement & { queue: { shuffle: () => void } }>(
-        'ytmusic-player-bar',
+      .querySelector<HTMLElement>(
+        'ytmusic-app-layout > ytmusic-miniplayer .ytmusicPlayerControlsShuffleButton button',
       )
-      ?.queue.shuffle();
+      ?.click();
   });
 
   const isShuffled = () => {
-    const isShuffled =
+    const classicBar = document.querySelector<HTMLElement>('ytmusic-player-bar');
+    if (classicBar) {
+      return classicBar.hasAttribute('shuffle-on');
+    }
+    return (
       document
-        .querySelector<HTMLElement>('ytmusic-player-bar')
-        ?.attributes.getNamedItem('shuffle-on') ?? null;
-
-    return isShuffled !== null;
+        .querySelector<HTMLElement>(
+          'ytmusic-app-layout > ytmusic-miniplayer .ytmusicPlayerControlsShuffleButton button',
+        )
+        ?.getAttribute('aria-pressed') === 'true'
+    );
   };
 
   window.ipcRenderer.on('peard:get-shuffle', () => {
@@ -333,30 +350,46 @@ async function onApiLoaded() {
     },
   );
   window.ipcRenderer.on('peard:switch-repeat', (_, repeat = 1) => {
+    const classicBar = document.querySelector<
+      HTMLElement & { onRepeatButtonClick?: () => void }
+    >('ytmusic-player-bar');
+    const repeatButton = document.querySelector<HTMLElement>(
+      'ytmusic-app-layout > ytmusic-miniplayer .ytmusicPlayerControlsRepeatButton button',
+    );
     for (let i = 0; i < repeat; i++) {
-      document
-        .querySelector<HTMLElement & { onRepeatButtonClick: () => void }>(
-          'ytmusic-player-bar',
-        )
-        ?.onRepeatButtonClick();
+      if (classicBar?.onRepeatButtonClick) {
+        classicBar.onRepeatButtonClick();
+      } else {
+        repeatButton?.click();
+      }
     }
   });
   window.ipcRenderer.on('peard:update-volume', (_, volume: number) => {
-    document
-      .querySelector<HTMLElement & { updateVolume: (volume: number) => void }>(
-        'ytmusic-player-bar',
-      )
-      ?.updateVolume(volume);
+    const classicBar = document.querySelector<
+      HTMLElement & { updateVolume?: (volume: number) => void }
+    >('ytmusic-player-bar');
+    if (classicBar?.updateVolume) {
+      classicBar.updateVolume(volume);
+      return;
+    }
+    const miniSlider = document.querySelector<HTMLInputElement>(
+      'ytmusic-app-layout > ytmusic-miniplayer .ytMusicMiniPlayerVolumeWrapper input#slider',
+    );
+    if (miniSlider) {
+      miniSlider.value = String(volume);
+      miniSlider.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+      miniSlider.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+    }
   });
 
-  const isFullscreen = () => {
-    const isFullscreen =
-      document
-        .querySelector<HTMLElement>('ytmusic-player-bar')
-        ?.attributes.getNamedItem('player-fullscreened') ?? null;
-
-    return isFullscreen !== null;
-  };
+  const isFullscreen = () =>
+    document
+      .querySelector<HTMLElement>('ytmusic-player-bar')
+      ?.hasAttribute('player-fullscreened') ||
+    document
+      .querySelector<HTMLElement>('ytmusic-app-layout')
+      ?.hasAttribute('player-fullscreened') ||
+    false;
 
   const clickFullscreenButton = (isFullscreenValue: boolean) => {
     const fullscreen = isFullscreen();
@@ -383,11 +416,18 @@ async function onApiLoaded() {
   );
 
   window.ipcRenderer.on('peard:toggle-mute', (_) => {
+    const classicBar = document.querySelector<
+      HTMLElement & { onVolumeClick?: () => void }
+    >('ytmusic-player-bar');
+    if (classicBar?.onVolumeClick) {
+      classicBar.onVolumeClick();
+      return;
+    }
     document
-      .querySelector<HTMLElement & { onVolumeClick: () => void }>(
-        'ytmusic-player-bar',
+      .querySelector<HTMLElement>(
+        'ytmusic-app-layout > ytmusic-miniplayer .ytMusicMiniPlayerMuteButton button',
       )
-      ?.onVolumeClick();
+      ?.click();
   });
 
   window.ipcRenderer.on('peard:get-queue', () => {
@@ -592,6 +632,11 @@ async function onApiLoaded() {
           likeButtonsOptions === 'hide' ? 'none' : 'inherit'
         } !important;
       }
+      ytmusic-miniplayer .ytMusicMiniPlayerActionBar {
+        display: ${
+          likeButtonsOptions === 'hide' ? 'none' : 'flex'
+        } !important;
+      }
       ytmusic-player-bar[is-mweb-player-bar-modernization-enabled] .middle-controls.ytmusic-player-bar {
         justify-content: ${
           likeButtonsOptions === 'hide' ? 'flex-start' : 'space-between'
@@ -605,7 +650,8 @@ async function onApiLoaded() {
   if (window.mainConfig.get('options.swapLikeButtonsOrder')) {
     const style = document.createElement('style');
     style.textContent = `
-      #like-button-renderer {
+      #like-button-renderer,
+      .ytSegmentedLikeDislikeButtonViewModelSegmentedButtonsWrapper {
         display: inline-flex;
         flex-direction: row-reverse;
       }`;
@@ -645,6 +691,7 @@ const preload = async () => {
   if (location.origin === 'https://music.youtube.com') {
     mountTempoSettings();
     mountTempoPlayerBar();
+    mountTempoAvToggle();
     mountTempoPlayerTabs();
     mountTempoQueueReorder();
   }

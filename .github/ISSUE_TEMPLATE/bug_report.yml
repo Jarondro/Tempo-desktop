@@ -19,7 +19,7 @@ body:
   attributes:
     label: Tempo Desktop Version
     description: What version of Tempo Desktop are you using?
-    placeholder: 0.0.1
+    placeholder: 0.0.2
   validations:
     required: true
 - type: dropdown
