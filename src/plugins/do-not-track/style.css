@@ -1,0 +1,9 @@
+ytmusic-mealbar-promo-renderer,
+ytmusic-statement-banner-renderer,
+#masthead-ad,
+ytd-ad-slot-renderer,
+ytd-in-feed-ad-layout-renderer,
+.ytp-ad-overlay-container,
+.ytp-ad-message-container {
+  display: none !important;
+}

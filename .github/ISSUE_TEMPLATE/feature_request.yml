@@ -1,0 +1,31 @@
+name: Feature Request
+description: Suggest an improvement or new feature for Tempo Desktop
+title: "[Feature Request]: "
+labels: "enhancement"
+body:
+- type: checkboxes
+  attributes:
+    label: Preflight Checklist
+    options:
+      - label: I am using the latest version of Tempo Desktop.
+        required: true
+      - label: I have checked existing issues for a similar feature request.
+        required: true
+- type: textarea
+  attributes:
+    label: Problem Description
+    description: Describe the problem or workflow this feature would improve.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Proposed Solution
+    description: Describe the behavior or UI you would like to see.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Additional Information
+    description: Any additional context, screenshots, or references.
+  validations:
+    required: false
